@@ -3,7 +3,6 @@ const fs = require('fs');
 fs.readFile('puzzle-input', 'utf-8', (err, data) => {
     let splitInput = data.split('\n');
 
-    debugger;
     let pairs = splitInput.map((pair) => {
         let rawElfSchedules = pair.split(',');
         let firstElfSchedule = rawElfSchedules[0].split('-');
@@ -15,7 +14,7 @@ fs.readFile('puzzle-input', 'utf-8', (err, data) => {
         };
     });
 
-    let numberOfOverlappingShifts = pairs.reduce((numberOfRedundantShifts, pair) => {
+    let numberOfRedundantShifts = pairs.reduce((numberOfRedundantShifts, pair) => {
         if (redundancyCheck(pair.firstElf.schedule, pair.secondElf.schedule) || redundancyCheck(pair.secondElf.schedule, pair.firstElf.schedule)) {
             numberOfRedundantShifts += 1;
         }
@@ -23,12 +22,27 @@ fs.readFile('puzzle-input', 'utf-8', (err, data) => {
         return numberOfRedundantShifts;
     }, 0);
 
-    console.log("Redundant shifts: " +numberOfOverlappingShifts);
+    console.log("Redundant shifts: " + numberOfRedundantShifts);
+
+    let numberOfOverlappingShifts = pairs.reduce((numberOfOverlappingShifts, pair) => {
+        if (overlapCheck(pair.firstElf.schedule, pair.secondElf.schedule)) {
+            numberOfOverlappingShifts += 1;
+        }
+
+        return numberOfOverlappingShifts
+    }, 0);
+
+    console.log("Overlapping shifts: " + numberOfOverlappingShifts);
+
 });
 
 const redundancyCheck = (schedule1, schedule2) => {
     // Schedules are already sorted, so we're comparing min and max values between schedules here
     return (schedule2[0] >= schedule1[0] && schedule2[schedule2.length - 1] <= schedule1[schedule1.length - 1])
+}
+
+const overlapCheck = (schedule1, schedule2) => {
+    return (schedule1.filter(time => schedule2.includes(time)).length >= 1);
 }
 
 const populateSchedule = (start, end) => {

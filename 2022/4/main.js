@@ -1,8 +1,9 @@
 const fs = require('fs');
 
-fs.readFile('test-puzzle-input', 'utf-8', (err, data) => {
+fs.readFile('puzzle-input', 'utf-8', (err, data) => {
     let splitInput = data.split('\n');
 
+    debugger;
     let pairs = splitInput.map((pair) => {
         let rawElfSchedules = pair.split(',');
         let firstElfSchedule = rawElfSchedules[0].split('-');
@@ -14,7 +15,21 @@ fs.readFile('test-puzzle-input', 'utf-8', (err, data) => {
         };
     });
 
+    let numberOfOverlappingShifts = pairs.reduce((numberOfRedundantShifts, pair) => {
+        if (redundancyCheck(pair.firstElf.schedule, pair.secondElf.schedule) || redundancyCheck(pair.secondElf.schedule, pair.firstElf.schedule)) {
+            numberOfRedundantShifts += 1;
+        }
+
+        return numberOfRedundantShifts;
+    }, 0);
+
+    console.log("Redundant shifts: " +numberOfOverlappingShifts);
 });
+
+const redundancyCheck = (schedule1, schedule2) => {
+    // Schedules are already sorted, so we're comparing min and max values between schedules here
+    return (schedule2[0] >= schedule1[0] && schedule2[schedule2.length - 1] <= schedule1[schedule1.length - 1])
+}
 
 const populateSchedule = (start, end) => {
     return {
@@ -27,7 +42,7 @@ const getFullShift = (start, end) => {
 
     // if/else to account for a single hour shift
     if (start !== end) {
-        for (i = start; i < end; i++) {
+        for (let i = start; i <= end; i++) {
             shifts.push(i);
         }
     } else {

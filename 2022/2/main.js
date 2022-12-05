@@ -12,25 +12,32 @@ fs.readFile('puzzle-input', 'utf-8', (err, data) => {
         };
     });
 
-    // These used for debugging the countPoint method
-    let undefinedCount = 0;
-    let correctCount = 0;
     let totalPoints = rounds.reduce((totalPoints, currentRound) => {
-        //console.log(currentRound);
-        if (typeof countPoints(currentRound.opponent, currentRound.me) === 'undefined') {
-            undefinedCount += 1;
-        };
-
-        if (typeof countPoints((currentRound.opponent, currentRound.me) === 'integer')) {
-            correctCount += 1;
-        }
+        return totalPoints + countPoints(currentRound.opponent, currentRound.me);
     }, 0);
 
-    console.log("Undefined counts: " + undefinedCount);
-    console.log("Correct counts: " + correctCount);
+    console.log("Total points if first condition: " + totalPoints);
+
+    let totalPointsFromSecondCondition = rounds.reduce((totalPoints, currentRound) => {
+        let resultNeeded = rules.getResultNeededFromCharacter(currentRound.me);
+
+        switch (resultNeeded) {
+            case 'win':
+                let pointsFromWin = countPoints(currentRound.opponent, rules.getWinningChoice(currentRound.opponent));
+                return (totalPoints + pointsFromWin);
+            case 'draw':
+                let pointsFromDraw = countPoints(currentRound.opponent, rules.getDrawChoice(currentRound.opponent));
+                return (totalPoints + pointsFromDraw);
+            case 'lose':
+                let pointsFromLoss = countPoints(currentRound.opponent, rules.getLosingChoice(currentRound.opponent));
+                return (totalPoints + pointsFromLoss);
+        }
+
+    }, 0);
+
+    console.log("Total points from second condition: " + totalPointsFromSecondCondition);
 });
 
-// todo Bug is here somewhere
 const countPoints = (opponentChoice, myChoice) => {
     // You're getting points from whatever choice you make
     let pointsFromChoice = rules.getPointsFromChoice(myChoice);

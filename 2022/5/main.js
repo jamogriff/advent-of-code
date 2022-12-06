@@ -26,9 +26,36 @@ const getInstructionsFromInput = (rawInstructions) => {
 }
 
 const getDiagramFromInput = (rawDiagram) => {
-    let diagram = rawDiagram.split(' ');
+    let textDiagram = rawDiagram.split('\n');
+    textDiagram.pop(); // last element of diagram isn't needed and will cause issue with populating data
+
+    let stringDivisionNumber = 4; // every 4th character a new "column" starts
+    let rowCharLength = textDiagram[0].length;
+    let numOfColumns = Math.ceil(rowCharLength / stringDivisionNumber);
+    debugger;
+    let diagram = new StorageDiagram(numOfColumns);
+
+    textDiagram.forEach((row) => {
+        processDiagramRow(diagram, row, rowCharLength, stringDivisionNumber);
+    })
 
     return diagram;
+}
+
+const processDiagramRow = (diagram, row, rowLength, colLength) => {
+    let chunkIndex = 1;
+    let resetIndex = colLength - 1; // colLength is 4, but that means a new index should occur on 3 due to zero-indexing
+    for (let i = 0; i < rowLength; i++) {
+        if (i % resetIndex === 0 && i !== 0) {
+            chunkIndex += 1;
+        }
+
+        debugger;
+        if (i % 2 === 0 && !(i % colLength === 0) && (row[i] !== ' ')) {
+            debugger;
+            diagram.columns[chunkIndex].unshift(row[i]);
+        }
+    }
 }
 
 class MovementInstruction {
@@ -38,5 +65,19 @@ class MovementInstruction {
         this.from = parseInt(splitInstructions[3]);
         this.to = parseInt(splitInstructions[5]);
     }
+}
 
+class StorageDiagram {
+    constructor(numberOfColumns) {
+        this.columns = this.initColumns(numberOfColumns);
+    }
+
+    initColumns(number) {
+        let columns = [];
+        for (let i = 1; i <= number; i++) {
+            columns[i] = [];
+        }
+
+        return columns;
+    }
 }

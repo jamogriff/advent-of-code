@@ -3,18 +3,48 @@ const fs = require('fs');
 fs.readFile('puzzle-input', 'utf-8', (err, data) => {
     let splitDiagramFromInstructions = data.split('\n\n');
 
+    // Diagram object has a column property with arrays indexed by their dedicated number
     let diagram = getDiagramFromInput(splitDiagramFromInstructions[0]);
-    console.log(diagram);
 
     // This is an array of MovementInstruction objects
     let instructions = getInstructionsFromInput(splitDiagramFromInstructions[1]);
-    /*let rucksackContents = splitInput.map((rucksack) => {
-        return {
-            compartment1: splitRucksackIntoEqualCompartments(rucksack).first,
-            compartment2: splitRucksackIntoEqualCompartments(rucksack).second,
-            fullRucksack: rucksack
-        };
-    });*/
+
+    instructions.forEach((instruction) => {
+        for (let i = 0; i < instruction.number; i++) {
+            // Popping and pushing ensures first in, last out (i.e. stack)
+            let lastIn = diagram.columns[instruction.from].pop();
+            diagram.columns[instruction.to].push(lastIn);
+        }
+    });
+
+    let cratesOnTopWithCrateMover9000 = diagram.columns.reduce((topLetters, column) => {
+        return topLetters + column.pop();
+    }, '');
+
+    console.log('Crates on top with CraneMover 9000: ' + cratesOnTopWithCrateMover9000);
+
+    let freshDiagram = getDiagramFromInput(splitDiagramFromInstructions[0]);
+
+    instructions.forEach((instruction) => {
+        let cratesBeingMoved = [];
+        for (let i = 0; i < instruction.number; i++) {
+            let topCrate = freshDiagram.columns[instruction.from].pop();
+            // Intermediate crate bundle is first-in, last out (use unshift)
+            cratesBeingMoved.unshift(topCrate);
+        }
+
+        // Shift bottom-most crate and push onto diagram
+        while (cratesBeingMoved.length > 0) {
+            let bottomCrate = cratesBeingMoved.shift();
+            freshDiagram.columns[instruction.to].push(bottomCrate);
+        }
+    });
+
+    let cratesOnTopWithCrateMover9001 = freshDiagram.columns.reduce((topLetters, column) => {
+        return topLetters + column.pop();
+    }, '');
+
+    console.log('Crates on top using CrateMover9001: ' + cratesOnTopWithCrateMover9001);
 });
 
 const getInstructionsFromInput = (rawInstructions) => {
@@ -32,7 +62,6 @@ const getDiagramFromInput = (rawDiagram) => {
     let stringDivisionNumber = 4; // every 4th character a new "column" starts
     let rowCharLength = textDiagram[0].length;
     let numOfColumns = Math.ceil(rowCharLength / stringDivisionNumber);
-    debugger;
     let diagram = new StorageDiagram(numOfColumns);
 
     textDiagram.forEach((row) => {
@@ -43,17 +72,19 @@ const getDiagramFromInput = (rawDiagram) => {
 }
 
 const processDiagramRow = (diagram, row, rowLength, colLength) => {
-    let chunkIndex = 1;
-    let resetIndex = colLength - 1; // colLength is 4, but that means a new index should occur on 3 due to zero-indexing
+    let correspondingArray = 1;
+    let letterIndex = 1;
+
     for (let i = 0; i < rowLength; i++) {
-        if (i % resetIndex === 0 && i !== 0) {
-            chunkIndex += 1;
+        // Given a colLength of 4, this ensures a "sub-increment" on indexes 3, 7, 11, etc
+        if (i % colLength === (colLength - 1)) {
+            correspondingArray += 1;
+            letterIndex += colLength;
         }
 
-        debugger;
-        if (i % 2 === 0 && !(i % colLength === 0) && (row[i] !== ' ')) {
-            debugger;
-            diagram.columns[chunkIndex].unshift(row[i]);
+        if ((i === letterIndex) && (row[i] !== ' ')) {
+            // Unshifting ensures populating via first-in, last out
+            diagram.columns[correspondingArray].unshift(row[i]);
         }
     }
 }

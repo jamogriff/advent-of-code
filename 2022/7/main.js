@@ -33,6 +33,7 @@ fs.readFile('puzzle-input', 'utf-8', (err, data) => {
     let rootDir = directoryPath[0];
     rootDir.calculateTotalSize(directorySizes);
 
+    debugger;
     // less verbose syntax for reduce (and can chain a filter call before it
     let sumOfDirsLessThan100k = directorySizes
         .filter(dirMem => dirMem <= 100000)
@@ -40,6 +41,15 @@ fs.readFile('puzzle-input', 'utf-8', (err, data) => {
 
     //console.log(util.inspect(directoryPath[0], {showHidden: false, depth: null, colors: true}))
     console.log('Total memory of dirs smaller than 100k: ' + sumOfDirsLessThan100k);
+
+    // Part 2
+    let totalDiskSpace = 70000000;
+    let spaceNeededForUpdate = 30000000;
+    let sortedDirMemory = directorySizes.sort((a, b) => a - b);
+    let currentFreeSpace = totalDiskSpace - sortedDirMemory.at(-1);
+    let targetMemoryToBeFreed = spaceNeededForUpdate - currentFreeSpace;
+    let deletionTarget = sortedDirMemory.find(dir => dir >= targetMemoryToBeFreed);
+    console.log('Dir to delete has ' + deletionTarget + ', to free up ' + targetMemoryToBeFreed);
 });
 
 class Directory {

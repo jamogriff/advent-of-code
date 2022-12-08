@@ -2,7 +2,7 @@ const fs = require('fs');
 const util = require('util')
 const inputHelper = require('./input-helper');
 
-fs.readFile('test-input', 'utf-8', (err, data) => {
+fs.readFile('puzzle-input', 'utf-8', (err, data) => {
     let splitInput = data.split('\n');
 
     // This is a stack that keeps track of the parent and current dirs,
@@ -24,12 +24,22 @@ fs.readFile('test-input', 'utf-8', (err, data) => {
 
         if (inputHelper.isFile(input)) {
             let fileElems = input.split(' ');
-            let file = new File(fileElems[1], fileElems[0]);
+            let file = new File(fileElems[1], parseInt(fileElems[0]));
             parentDir?.files.push(file);
         }
     }
 
-    console.log(util.inspect(directoryPath[0], {showHidden: false, depth: null, colors: true}))
+    let directorySizes = [];
+    let rootDir = directoryPath[0];
+    rootDir.calculateTotalSize(directorySizes);
+
+    // less verbose syntax for reduce (and can chain a filter call before it
+    let sumOfDirsLessThan100k = directorySizes
+        .filter(dirMem => dirMem <= 100000)
+        .reduce((totalMem, dirMem) => totalMem + dirMem, 0);
+
+    //console.log(util.inspect(directoryPath[0], {showHidden: false, depth: null, colors: true}))
+    console.log('Total memory of dirs smaller than 100k: ' + sumOfDirsLessThan100k);
 });
 
 class Directory {
@@ -39,14 +49,16 @@ class Directory {
         this.files = [];
     }
 
-    calculateTotalSize() {
+    calculateTotalSize(dirSizes) {
         let filesize = this.files.reduce((size, file) => {
             return size + file.size;
         }, 0);
 
         let childDirectorySize = this.directories.reduce((size, directory) => {
-            return size + directory.calculateTotalSize();
+            return size + directory.calculateTotalSize(dirSizes);
         }, 0);
+
+        dirSizes.push(filesize + childDirectorySize);
 
         return filesize + childDirectorySize;
     }

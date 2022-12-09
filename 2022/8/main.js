@@ -25,7 +25,6 @@ fs.readFile('puzzle-input', 'utf-8', (err, data) => {
     let idealTree = treeGrid.reduce((idealTreeScore, tree) => {
         let treeScore = calculateVisibilityScore(tree, maxXCoordinate, maxYCoordinate);
 
-        debugger;
         if (treeScore > idealTreeScore) {
             idealTreeScore = treeScore;
         }
@@ -33,43 +32,52 @@ fs.readFile('puzzle-input', 'utf-8', (err, data) => {
         return idealTreeScore;
     }, 0);
 
-    //todo got 120, but that is too low... :(
     console.log('The ideal tree has a score of: ' + idealTree);
 });
 
 const calculateVisibilityScore = (tree, maxXCoordinate, maxYCoordinate) => {
-    let score = 0;
+    let score = 1; // we're multiplying so using 1, not 0
 
     if (tree.tallerTreesOnTop.length > 0) {
         let sortedAsc = tree.tallerTreesOnTop.sort((a, b) => a.y - b.y);
         let closest = sortedAsc.pop()
-        score += Math.abs(tree.y - closest.y);
+        score *= Math.abs(tree.y - closest.y);
     } else {
-        score += tree.y;
+        if (tree.y !== 0) {
+            score *= tree.y;
+        }
     }
 
     if (tree.tallerTreesOnBottom.length > 0) {
         let sortedDsc = tree.tallerTreesOnBottom.sort((a, b) => b.y - a.y);
         let closest = sortedDsc.pop();
-        score += Math.abs(tree.y - closest.y);
+        score *= Math.abs(tree.y - closest.y);
     } else {
-        score += (maxYCoordinate - tree.y);
+        let viewDistance = (maxYCoordinate - tree.y);
+        if (viewDistance !== 0) {
+            score *= viewDistance;
+        }
     }
 
     if (tree.tallerTreesOnLeft.length > 0) {
         let sortedAsc = tree.tallerTreesOnLeft.sort((a, b) => a.x - b.x);
         let closest = sortedAsc.pop();
-        score += Math.abs(tree.x - closest.x);
+        score *= Math.abs(tree.x - closest.x);
     } else {
-        score += tree.x;
+        if (tree.x !== 0) {
+            score *= tree.x;
+        }
     }
 
     if (tree.tallerTreesOnRight.length > 0) {
         let sortedDsc = tree.tallerTreesOnRight.sort((a, b) => b.x - a.x);
         let closest = sortedDsc.pop();
-        score += Math.abs(tree.x - closest.x);
+        score *= Math.abs(tree.x - closest.x);
     } else {
-        score += maxXCoordinate - tree.x;
+        let viewDistance = maxXCoordinate - tree.x;
+        if (viewDistance !== 0) {
+            score *= viewDistance;
+        }
     }
 
     return score;

@@ -4,7 +4,7 @@ module.exports = {
     draw: 3,
     loss: 0
  },
-    getResultNeededFromCharacter: (character) => {
+    getResultNeededFromCharacter: (character: string) => {
      switch (character) {
          case "X":
              return 'lose';
@@ -15,7 +15,7 @@ module.exports = {
      }
     },
 
- getPointsFromChoice: (choice) => {
+ getPointsFromChoice: (choice: string) => {
     switch (choice) {
         case 'X':
             return 1;
@@ -26,7 +26,7 @@ module.exports = {
     }
 },
 
- getWinningChoice: (choice) => {
+ getWinningChoice: (choice: string) => {
     switch (choice) {
         case 'A':
             return 'Y';
@@ -37,7 +37,7 @@ module.exports = {
     }
 },
 
- getLosingChoice: (choice) => {
+ getLosingChoice: (choice: string) => {
     switch (choice) {
         case 'A':
             return 'Z';
@@ -48,7 +48,7 @@ module.exports = {
     }
  },
 
- getDrawChoice: (choice) => {
+ getDrawChoice: (choice: string) => {
     switch (choice) {
         case 'A':
             return 'X';

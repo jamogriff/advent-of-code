@@ -1,7 +1,7 @@
 const fs = require('fs');
 const rules = require('./game-rules');
 
-fs.readFile('puzzle-input', 'utf-8', (err, data) => {
+fs.readFile('puzzle-input', 'utf-8', (err: string, data: string) => {
     let splitInput = data.split('\n');
 
     let rounds = splitInput.map((round) => {
@@ -38,7 +38,7 @@ fs.readFile('puzzle-input', 'utf-8', (err, data) => {
     console.log("Total points from second condition: " + totalPointsFromSecondCondition);
 });
 
-const countPoints = (opponentChoice, myChoice) => {
+const countPoints = (opponentChoice: string, myChoice: string) => {
     // You're getting points from whatever choice you make
     let pointsFromChoice = rules.getPointsFromChoice(myChoice);
 

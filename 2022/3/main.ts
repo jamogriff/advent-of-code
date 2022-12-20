@@ -1,6 +1,16 @@
 const fs = require('fs');
+type Rucksack = {
+    compartment1: string,
+    compartment2: string,
+    fullRucksack: string
+}
 
-fs.readFile('puzzle-input', 'utf-8', (err, data) => {
+type ItemPriority = {
+    priority: number,
+    itemType: string
+}
+
+fs.readFile('puzzle-input', 'utf-8', (err: string, data: string) => {
     let splitInput = data.split('\n');
 
     let rucksackContents = splitInput.map((rucksack) => {
@@ -30,47 +40,59 @@ fs.readFile('puzzle-input', 'utf-8', (err, data) => {
         rucksackGroups[chunkIndex].push(rucksack);
 
         return rucksackGroups;
-    }, []);
+    }, [] as Rucksack[][]);
 
     let groupedSharedItems = elfGroups.reduce((allGroupItemTypes, group) => {
         let sharedItemTypeBetweenOneAndTwo = getSharedItemTypes(group[0].fullRucksack.split(''), group[1].fullRucksack.split(''));
         let sharedItemTypeBetweenTwoAndThree = getSharedItemTypes(group[1].fullRucksack.split(''), group[2].fullRucksack.split(''));
+        let commonItemTypes = getSharedItemTypes(sharedItemTypeBetweenOneAndTwo, sharedItemTypeBetweenTwoAndThree).pop();
 
-        allGroupItemTypes.push(getSharedItemTypes(sharedItemTypeBetweenOneAndTwo, sharedItemTypeBetweenTwoAndThree).pop());
+        if (typeof commonItemTypes !== 'undefined') {
+            allGroupItemTypes.push(commonItemTypes);
+        }
 
         return allGroupItemTypes;
-    }, []);
+    }, [] as string[]);
 
     console.log('Total priorities of grouped item types: ' + sumPriorities(groupedSharedItems));
 });
 
-const getTotalItemPrioritiesForEachRucksack = (rucksackContents) => {
-    let sharedRucksackItems = rucksackContents.map((rucksack) => {
+const getTotalItemPrioritiesForEachRucksack = (rucksackContents: Rucksack[]) => {
+    let sharedRucksackItems = rucksackContents.reduce((sharedItems, rucksack) => {
         let firstCompartmentItemTypes = rucksack.compartment1.split('');
         let secondCompartmentItemTypes = rucksack.compartment2.split('');
-
         // Duplicate values come back; since we know there's only one shared item we just pop one element off
-        return getSharedItemTypes(firstCompartmentItemTypes, secondCompartmentItemTypes).pop();
-    })
+        let commonItemType = getSharedItemTypes(firstCompartmentItemTypes, secondCompartmentItemTypes).pop();
+
+        if (typeof commonItemType !== 'undefined') {
+            sharedItems.push(commonItemType);
+        }
+
+        return sharedItems;
+    }, [] as string[])
 
     return sumPriorities(sharedRucksackItems);
 }
 
-const sumPriorities = (itemTypes) => {
+const sumPriorities = (itemTypes: string[]) => {
     let itemPriorityMap = createPriorityMap();
 
     return itemTypes.reduce((priorityTotal, sharedItemType) => {
         let itemPriority = itemPriorityMap.find(keyVal => keyVal.itemType === sharedItemType);
 
-        return priorityTotal + itemPriority.priority;
+        if (typeof itemPriority !== 'undefined') {
+            return priorityTotal + itemPriority.priority;
+        } else {
+            return priorityTotal;
+        }
     }, 0);
 }
 
-const getSharedItemTypes = (firstCompartment, secondCompartment) => {
+const getSharedItemTypes = (firstCompartment: string[], secondCompartment: string[]) => {
    return firstCompartment.filter(itemType => secondCompartment.includes(itemType));
 }
 
-const splitRucksackIntoEqualCompartments = (rucksackContents) => {
+const splitRucksackIntoEqualCompartments = (rucksackContents: string) => {
     let half = rucksackContents.length / 2;
 
     return {
@@ -79,13 +101,13 @@ const splitRucksackIntoEqualCompartments = (rucksackContents) => {
     };
 }
 
-const createPriorityMap = () => {
+const createPriorityMap = () : ItemPriority[] => {
     let map = [];
     let lowPriorityStartingChar = 'a';
     let highPriorityStartingChar = 'A';
     let characterSetLength = 26; // used as modulo to normalize numbers
 
-    for (i = 1; i < 53; i++) {
+    for (let i = 1; i < 53; i++) {
         if (i < 27) {
             var startingChar = lowPriorityStartingChar;
         } else {
